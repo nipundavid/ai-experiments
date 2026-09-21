@@ -1,17 +1,17 @@
-# JEv + LangGraph Experiment
+# Jev + LangGraph Experiment
 
-A small experimental project exploring **JEv by TypeSafe AI** and how it can be integrated with **LangGraph** to make structured decisions inside an agent workflow.
+A small experimental project exploring **Jev by TypeSafe AI** and how it can be integrated with **LangGraph** to make structured decisions inside an agent workflow.
 
-The goal of this project is not to use JEv as a replacement for an LLM, but to understand how a **decision model** can work alongside generative models and workflow orchestration.
+The goal of this project is not to use Jev as a replacement for an LLM, but to understand how a **decision model** can work alongside generative models and workflow orchestration.
 
 ---
 
 ## Official Resources and Related Articles
 
-### TypeSafe AI and JEv
+### TypeSafe AI and Jev
 
 - [TypeSafe AI](https://typesafe.ai/): official TypeSafe AI website.
-- [Introducing System One Models and Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev): TypeSafe AI's overview of JEv and structured decisions.
+- [Introducing System One Models and Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev): TypeSafe AI's overview of Jev and structured decisions.
 
 ### LangGraph and LangChain
 
@@ -26,26 +26,26 @@ The goal of this project is not to use JEv as a replacement for an LLM, but to u
 - [Google AI for Developers blog](https://developers.googleblog.com/): announcements and technical posts from Google's AI developer team.
 - [ChatGoogleGenerativeAI integration](https://docs.langchain.com/oss/python/integrations/chat/google_generative_ai): LangChain documentation used by `experiment_4_gemini.py`.
 
-### Other JEv Use Cases
+### Other Jev Use Cases
 
 - [12 Jev Use Cases Tested](https://www.mindstudio.ai/blog/jev-use-cases-automation): automation and high-volume classification examples.
 - [What is Jev?](https://vercel.com/i/what-is-jev): bounded decisions, evidence, confidence, and human review.
 
 ---
 
-## JEv in Brief
+## Jev in Brief
 
-JEv is a decision-focused model from TypeSafe AI. It is designed to take
+Jev is a decision-focused model from TypeSafe AI. It is designed to take
 application state plus explicitly defined questions and return structured
 decisions that software can use directly.
 
-JEv is not intended to replace a generative LLM. The central idea of this
+Jev is not intended to replace a generative LLM. The central idea of this
 project is to use the right model for each part of a workflow:
 
 ```text
 Application state
     ↓
-     JEv        → decides: classify, score, approve, or defer
+     Jev        → decides: classify, score, approve, or defer
     ↓
    LangGraph      → stores state and routes the workflow
     ↓
@@ -56,17 +56,17 @@ Application state
 
 | Part        | Meaning                                                              | Example in this project                                                       |
 | ----------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `state`     | The text or structured data JEv evaluates                            | A user query or tool request                                                  |
+| `state`     | The text or structured data Jev evaluates                            | A user query or tool request                                                  |
 | `questions` | The bounded decisions the application wants answered                 | `is_simple`, `category`, or `requires_retrieval`                              |
 | `Noul`      | A yes/no-style probability                                           | Approve a tool call in [`experiment_5_guard.py`](src/experiment_5_guard.py)   |
 | `Choice`    | One label from predefined options, with probabilities and confidence | Route to a worker in [`experiment_3_routing.py`](src/experiment_3_routing.py) |
 | `Score`     | A value on an ordered rubric                                         | Estimate complexity in [`experiment_2_score.py`](src/experiment_2_score.py)   |
 
-The application defines the decision space first. JEv evaluates the supplied
+The application defines the decision space first. Jev evaluates the supplied
 state against that space and returns typed answers, rather than a paragraph
 that the application must parse.
 
-### JEv Compared With a Generative LLM
+### Jev Compared With a Generative LLM
 
 | Concern                 | Generative LLM                                                                       | JEv                                                            |
 | ----------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
@@ -77,7 +77,7 @@ that the application must parse.
 | Uncertainty             | May require additional handling or log-probability tooling                           | Probabilities and confidence are part of the decision response |
 | Role in this repository | Generates the final answer in [`experiment_4_gemini.py`](src/experiment_4_gemini.py) | Makes the routing and policy decisions in experiments 1–6      |
 
-This is a division of responsibilities, not a claim that JEv is universally
+This is a division of responsibilities, not a claim that Jev is universally
 more accurate or a replacement for an LLM. The evaluation experiment exists to
 measure whether a particular decision workflow is reliable enough for its use
 case.
@@ -117,9 +117,9 @@ This project is trying to answer a practical question:
 
 The experiments are intended to show that:
 
-- **JEv is useful for bounded decisions:** use `Noul`, `Choice`, and `Score` when the output can be expressed as a probability, category, or numeric scale.
+- **Jev is useful for bounded decisions:** use `Noul`, `Choice`, and `Score` when the output can be expressed as a probability, category, or numeric scale.
 - **Structured decisions simplify application code:** the workflow can consume typed results directly instead of parsing free-form LLM text.
-- **LangGraph should own orchestration:** JEv decides, while LangGraph stores state and routes execution.
+- **LangGraph should own orchestration:** Jev decides, while LangGraph stores state and routes execution.
 - **Probabilities can become explicit policy:** confidence and decision probabilities can control thresholds, fallbacks, and human review.
 - **Decision questions should be decomposed:** several narrow questions are easier to inspect and evaluate than one broad prompt asking an LLM to do everything.
 - **Insufficient evidence is a valid result:** a workflow should be able to defer or escalate instead of forcing an unreliable category.

@@ -63,5 +63,5 @@ app = graph.compile()
 
 if __name__ == "__main__":
     result = app.invoke({"query": "Explain why retrieval can improve an LLM answer."})
-    print(f"JEv route: {result['category']}")
+    print(f"Jev route: {result['category']}")
     print(f"Gemini answer:\n{result['answer']}")

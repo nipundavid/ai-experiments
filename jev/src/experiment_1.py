@@ -6,7 +6,7 @@ from langchain_typesafe import Choice, Noul, TypeSafeClassifier
 
 
 # ============================================================
-# JEV
+# Jev
 # ============================================================
 
 classifier = TypeSafeClassifier(
@@ -21,13 +21,13 @@ classifier = TypeSafeClassifier(
 class State(TypedDict):
     query: str
 
-    # Decisions made by JEv.
+    # Decisions made by Jev.
     is_simple: bool
     category: str
 
 
 # ============================================================
-# JEV NODE
+# Jev node
 # ============================================================
 
 def analyze_query(state: State):
