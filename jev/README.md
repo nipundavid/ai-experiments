@@ -6,6 +6,139 @@ The goal of this project is not to use JEv as a replacement for an LLM, but to u
 
 ---
 
+## Official Resources and Related Articles
+
+### TypeSafe AI and JEv
+
+- [TypeSafe AI](https://typesafe.ai/): official TypeSafe AI website.
+- [Introducing System One Models and Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev): TypeSafe AI's overview of JEv and structured decisions.
+
+### LangGraph and LangChain
+
+- [LangGraph documentation](https://docs.langchain.com/oss/python/langgraph/overview): official concepts, guides, and API documentation.
+- [LangGraph GitHub repository](https://github.com/langchain-ai/langgraph): source code and examples.
+- [Building a Harness with Jev](https://www.langchain.com/blog/building-a-harness-with-jev): LangChain's example of using JEv in an agent harness.
+
+### Google Gemini
+
+- [Gemini API documentation](https://ai.google.dev/gemini-api/docs): official Gemini API guides and reference.
+- [Gemini models](https://ai.google.dev/gemini-api/docs/models): available models and model capabilities.
+- [Google AI for Developers blog](https://developers.googleblog.com/): announcements and technical posts from Google's AI developer team.
+- [ChatGoogleGenerativeAI integration](https://docs.langchain.com/oss/python/integrations/chat/google_generative_ai): LangChain documentation used by `experiment_4_gemini.py`.
+
+### Other JEv Use Cases
+
+- [12 Jev Use Cases Tested](https://www.mindstudio.ai/blog/jev-use-cases-automation): automation and high-volume classification examples.
+- [What is Jev?](https://vercel.com/i/what-is-jev): bounded decisions, evidence, confidence, and human review.
+
+---
+
+## JEv in Brief
+
+JEv is a decision-focused model from TypeSafe AI. It is designed to take
+application state plus explicitly defined questions and return structured
+decisions that software can use directly.
+
+JEv is not intended to replace a generative LLM. The central idea of this
+project is to use the right model for each part of a workflow:
+
+```text
+Application state
+    ↓
+     JEv        → decides: classify, score, approve, or defer
+    ↓
+   LangGraph      → stores state and routes the workflow
+    ↓
+  LLM / tool      → explains, generates, or performs an action
+```
+
+### What Goes In and What Comes Out
+
+| Part        | Meaning                                                              | Example in this project                                                       |
+| ----------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `state`     | The text or structured data JEv evaluates                            | A user query or tool request                                                  |
+| `questions` | The bounded decisions the application wants answered                 | `is_simple`, `category`, or `requires_retrieval`                              |
+| `Noul`      | A yes/no-style probability                                           | Approve a tool call in [`experiment_5_guard.py`](src/experiment_5_guard.py)   |
+| `Choice`    | One label from predefined options, with probabilities and confidence | Route to a worker in [`experiment_3_routing.py`](src/experiment_3_routing.py) |
+| `Score`     | A value on an ordered rubric                                         | Estimate complexity in [`experiment_2_score.py`](src/experiment_2_score.py)   |
+
+The application defines the decision space first. JEv evaluates the supplied
+state against that space and returns typed answers, rather than a paragraph
+that the application must parse.
+
+### JEv Compared With a Generative LLM
+
+| Concern                 | Generative LLM                                                                       | JEv                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Primary job             | Explain, reason in depth, write, or generate content                                 | Make bounded decisions for software                            |
+| Output                  | Usually free-form text or generated tool arguments                                   | Typed `Noul`, `Choice`, or `Score` answers                     |
+| Best fit                | Answers, summaries, code, plans, and creative work                                   | Classification, routing, scoring, filtering, and approval      |
+| Application control     | The application interprets generated text or tool calls                              | The application defines options, thresholds, and branches      |
+| Uncertainty             | May require additional handling or log-probability tooling                           | Probabilities and confidence are part of the decision response |
+| Role in this repository | Generates the final answer in [`experiment_4_gemini.py`](src/experiment_4_gemini.py) | Makes the routing and policy decisions in experiments 1–6      |
+
+This is a division of responsibilities, not a claim that JEv is universally
+more accurate or a replacement for an LLM. The evaluation experiment exists to
+measure whether a particular decision workflow is reliable enough for its use
+case.
+
+### Why This Matters
+
+Using a generative model for every small control-flow decision can make a
+workflow harder to validate: the application has to interpret prose, enforce
+allowed values, and decide what to do with uncertainty. JEv makes those
+decisions explicit so ordinary application code can apply policies such as:
+
+```python
+if approval_probability >= 0.8:
+  run_tool()
+else:
+  request_human_review()
+```
+
+The experiments demonstrate the progression:
+
+1. [`experiment_1.py`](src/experiment_1.py) shows multiple independent decisions in one request.
+2. [`experiment_2_score.py`](src/experiment_2_score.py) shows when an ordered score is more useful than a label.
+3. [`experiment_3_routing.py`](src/experiment_3_routing.py) connects a decision to LangGraph branches.
+4. [`experiment_4_gemini.py`](src/experiment_4_gemini.py) hands generation to Gemini after classification.
+5. [`experiment_5_guard.py`](src/experiment_5_guard.py) turns probability into an approval policy.
+6. [`experiment_6_workflow_eval.py`](src/experiment_6_workflow_eval.py) checks the workflow across representative cases.
+
+---
+
+## Goals and Takeaways
+
+This project is trying to answer a practical question:
+
+> Can a specialized decision model make agent workflows simpler, more
+> predictable, and easier to control than asking a generative LLM to make every
+> decision?
+
+The experiments are intended to show that:
+
+- **JEv is useful for bounded decisions:** use `Noul`, `Choice`, and `Score` when the output can be expressed as a probability, category, or numeric scale.
+- **Structured decisions simplify application code:** the workflow can consume typed results directly instead of parsing free-form LLM text.
+- **LangGraph should own orchestration:** JEv decides, while LangGraph stores state and routes execution.
+- **Probabilities can become explicit policy:** confidence and decision probabilities can control thresholds, fallbacks, and human review.
+- **Decision questions should be decomposed:** several narrow questions are easier to inspect and evaluate than one broad prompt asking an LLM to do everything.
+- **Insufficient evidence is a valid result:** a workflow should be able to defer or escalate instead of forcing an unreliable category.
+- **Generative models still have a separate role:** Gemini is used for explanation and generation after JEv has made a control-flow decision.
+- **The workflow must be evaluated, not assumed correct:** speed and type safety do not prove semantic accuracy, so repeated evaluation cases are included.
+
+### Experiment Map
+
+| Experiment                      | What we are trying to learn                                  | Main takeaway                                                                             |
+| ------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `experiment_1.py`               | Can one JEv call answer multiple structured questions?       | Multiple independent decisions can be returned in one typed response.                     |
+| `experiment_2_score.py`         | When is a continuous score more useful than a yes/no answer? | Ordered rubrics represent complexity and other gradual properties better than categories. |
+| `experiment_3_routing.py`       | Can JEv control LangGraph branches?                          | A `Choice` can select a workflow worker, including an insufficient-evidence path.         |
+| `experiment_4_gemini.py`        | Where should JEv end and a generative model begin?           | JEv handles routing; Gemini handles the final natural-language answer.                    |
+| `experiment_5_guard.py`         | Can probabilities enforce a tool-approval policy?            | Thresholds can approve low-risk work and send uncertain requests for review.              |
+| `experiment_6_workflow_eval.py` | How do we test a decision workflow across cases?             | A working demo still needs repeatable accuracy and confidence measurements.               |
+
+---
+
 ## 1. What is JEv?
 
 JEv is a decision-oriented model from **TypeSafe AI**.
@@ -760,6 +893,20 @@ This is a useful pattern for:
 
 ---
 
+---
+
+## Experiment 6 — Workflow evaluation
+
+Run the same decision workflow over several representative cases and record:
+
+- Category accuracy
+- Retrieval-decision accuracy
+- Choice confidence
+- Noul retrieval probability
+
+This follows the harness and workflow-evaluation pattern described in the
+[LangChain Jev article](https://www.langchain.com/blog/building-a-harness-with-jev).
+
 # 13. Key Takeaways
 
 The main thing to remember from this experiment:
@@ -823,6 +970,7 @@ python src/experiment_2_score.py  # Ordered complexity score
 python src/experiment_3_routing.py  # Conditional category routing
 python src/experiment_4_gemini.py  # JEv classification + Gemini
 python src/experiment_5_guard.py  # Tool approval guard
+python src/experiment_6_workflow_eval.py  # Repeatable workflow evaluation
 ```
 
 Or:
@@ -867,3 +1015,4 @@ Current:
 - [x] Multi-agent routing (worker stubs in `experiment_3_routing.py`)
 - [x] Tool-selection experiment (approval gate in `experiment_5_guard.py`)
 - [x] JEv-based guard/approval workflow
+- [x] Workflow evaluation harness

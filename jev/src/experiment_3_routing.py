@@ -6,7 +6,7 @@ from langgraph.graph import END, START, StateGraph
 
 
 classifier = TypeSafeClassifier(api_key=os.environ["TYPESAFE_API_KEY"])
-Category = Literal["rag", "coding", "system_design", "general"]
+Category = Literal["rag", "coding", "system_design", "general", "insufficient_evidence"]
 
 
 class State(TypedDict, total=False):
@@ -27,6 +27,7 @@ def classify_query(state: State):
                         "coding": "Writing, debugging, or understanding code.",
                         "system_design": "Software architecture or system design.",
                         "general": "Anything that does not fit the other categories.",
+                        "insufficient_evidence": "The query does not contain enough information to assign a reliable category.",
                     },
                 )
             },
@@ -48,16 +49,19 @@ def make_worker(label: str):
 
 graph = StateGraph(State)
 graph.add_node("classify_query", classify_query)
-for category in ("rag", "coding", "system_design", "general"):
+for category in ("rag", "coding", "system_design", "general", "insufficient_evidence"):
     graph.add_node(category, make_worker(category))
 
 graph.add_edge(START, "classify_query")
 graph.add_conditional_edges(
     "classify_query",
     route_query,
-    {category: category for category in ("rag", "coding", "system_design", "general")},
+    {
+        category: category
+        for category in ("rag", "coding", "system_design", "general", "insufficient_evidence")
+    },
 )
-for category in ("rag", "coding", "system_design", "general"):
+for category in ("rag", "coding", "system_design", "general", "insufficient_evidence"):
     graph.add_edge(category, END)
 
 app = graph.compile()
