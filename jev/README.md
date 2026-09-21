@@ -796,116 +796,75 @@ The idea is to avoid using an expensive generative model for every small decisio
 
 ---
 
-# 12. What to Experiment With Next
+# 12. Completed Experiments in This Repository
 
-## Experiment 1 — Binary decisions
+The repository already includes the following implemented experiments and supporting code:
 
-Create Noul questions such as:
+## Experiment 1 — Binary decisions + structured classification
 
-```text
-Does this query require retrieval?
+Implemented in [`experiment_1.py`](src/experiment_1.py).
 
-Should we call an external API?
+This experiment asks Jev to evaluate a query with:
 
-Does this request require human approval?
+- a binary `Noul` question (`is_simple`)
+- a categorical `Choice` question (`category`)
 
-Is this request relevant to our application?
-```
-
----
-
-## Experiment 2 — Classification
-
-Use Choice:
-
-```text
-RAG
-Coding
-System Design
-General
-```
-
-Then route the LangGraph workflow based on the result.
+The code returns both values in one response and stores them in a LangGraph state.
 
 ---
 
-## Experiment 3 — Multiple decisions in one call
+## Experiment 2 — Ordered scoring
 
-Ask Jev several questions simultaneously:
+Implemented in [`experiment_2_score.py`](src/experiment_2_score.py).
 
-```text
-Is this simple?
-Does this require retrieval?
-Is this coding related?
-Which category is it?
-```
+This experiment uses a `Score` response to rank query complexity against a rubric instead of a simple yes/no answer. It is useful for understanding when a continuous score is more informative than a hard category.
 
-Observe how structured the response is.
+---
+
+## Experiment 3 — Routing with LangGraph
+
+Implemented in [`experiment_3_routing.py`](src/experiment_3_routing.py).
+
+This experiment uses Jev's `Choice` result to route execution into different LangGraph workers or branches. The key pattern is: decision made by Jev, orchestration handled by LangGraph.
 
 ---
 
 ## Experiment 4 — Jev + Gemini
 
-Build:
+Implemented in [`experiment_4_gemini.py`](src/experiment_4_gemini.py).
 
-```text
-User
- │
- ▼
-Jev
- │
- ├── Simple ────────► Gemini
- │
- ├── RAG ───────────► RAG Agent
- │
- ├── Coding ────────► Coding Agent
- │
- └── System Design ─► Design Agent
-```
+This experiment shows a practical split of responsibilities:
 
-This is where the experiment becomes a realistic agent architecture.
+- Jev decides the route or decision
+- Gemini generates the final answer or explanation
+
+This is the clearest example in the repo of a decision layer working alongside an LLM.
 
 ---
 
-## Experiment 5 — Jev as a guard/decision layer
+## Experiment 5 — Tool-approval guard
 
-Try:
+Implemented in [`experiment_5_guard.py`](src/experiment_5_guard.py).
 
-```text
-User
- ↓
-Jev
- ↓
-Should this action be allowed?
- ↓
-YES ──► Tool
-NO  ──► Stop
-```
-
-This is a useful pattern for:
-
-- Tool authorization
-- Human escalation
-- Expensive-model routing
-- Retrieval decisions
-- Workflow branching
-- Agent termination
+This experiment turns a Jev probability into a policy decision. The workflow checks whether the probability is high enough to allow a tool call, or whether it should defer or stop.
 
 ---
 
+## Experiment 6 — Workflow evaluation harness
+
+Implemented in [`experiment_6_workflow_eval.py`](src/experiment_6_workflow_eval.py).
+
+This experiment evaluates the decision workflow across multiple cases and records:
+
+- category accuracy
+- confidence
+- latency
+- cost metadata
+- uncertainty cases
+
+This is the repository's practical validation layer, not just a demo.
+
 ---
-
-## Experiment 6 — Workflow evaluation
-
-Run the same decision workflow over several representative cases and record:
-
-- Category accuracy
-- Retrieval-decision accuracy
-- Choice confidence
-- Noul retrieval probability
-
-This follows the harness and workflow-evaluation pattern described in the
-[LangChain Jev article](https://www.langchain.com/blog/building-a-harness-with-jev).
 
 # 13. Key Takeaways
 
