@@ -104,7 +104,7 @@ def analyze_query(state: State):
 
 
     print("\n" + "=" * 70)
-    print("RAW JEV RESPONSE")
+    print("RAW Jev RESPONSE")
     print("=" * 70)
 
     print(response)

@@ -17,7 +17,7 @@ The goal of this project is not to use Jev as a replacement for an LLM, but to u
 
 - [LangGraph documentation](https://docs.langchain.com/oss/python/langgraph/overview): official concepts, guides, and API documentation.
 - [LangGraph GitHub repository](https://github.com/langchain-ai/langgraph): source code and examples.
-- [Building a Harness with Jev](https://www.langchain.com/blog/building-a-harness-with-jev): LangChain's example of using JEv in an agent harness.
+- [Building a Harness with Jev](https://www.langchain.com/blog/building-a-harness-with-jev): LangChain's example of using Jev in an agent harness.
 
 ### Google Gemini
 
@@ -45,7 +45,7 @@ project is to use the right model for each part of a workflow:
 ```text
 Application state
     ↓
-     Jev        → decides: classify, score, approve, or defer
+   Jev            → decides: classify, score, approve, or defer
     ↓
    LangGraph      → stores state and routes the workflow
     ↓
@@ -68,7 +68,7 @@ that the application must parse.
 
 ### Jev Compared With a Generative LLM
 
-| Concern                 | Generative LLM                                                                       | JEv                                                            |
+| Concern                 | Generative LLM                                                                       | Jev                                                            |
 | ----------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
 | Primary job             | Explain, reason in depth, write, or generate content                                 | Make bounded decisions for software                            |
 | Output                  | Usually free-form text or generated tool arguments                                   | Typed `Noul`, `Choice`, or `Score` answers                     |
@@ -86,7 +86,7 @@ case.
 
 Using a generative model for every small control-flow decision can make a
 workflow harder to validate: the application has to interpret prose, enforce
-allowed values, and decide what to do with uncertainty. JEv makes those
+allowed values, and decide what to do with uncertainty. Jev makes those
 decisions explicit so ordinary application code can apply policies such as:
 
 ```python
@@ -123,25 +123,25 @@ The experiments are intended to show that:
 - **Probabilities can become explicit policy:** confidence and decision probabilities can control thresholds, fallbacks, and human review.
 - **Decision questions should be decomposed:** several narrow questions are easier to inspect and evaluate than one broad prompt asking an LLM to do everything.
 - **Insufficient evidence is a valid result:** a workflow should be able to defer or escalate instead of forcing an unreliable category.
-- **Generative models still have a separate role:** Gemini is used for explanation and generation after JEv has made a control-flow decision.
+- **Generative models still have a separate role:** Gemini is used for explanation and generation after Jev has made a control-flow decision.
 - **The workflow must be evaluated, not assumed correct:** speed and type safety do not prove semantic accuracy, so repeated evaluation cases are included.
 
 ### Experiment Map
 
 | Experiment                      | What we are trying to learn                                  | Main takeaway                                                                             |
 | ------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `experiment_1.py`               | Can one JEv call answer multiple structured questions?       | Multiple independent decisions can be returned in one typed response.                     |
+| `experiment_1.py`               | Can one Jev call answer multiple structured questions?       | Multiple independent decisions can be returned in one typed response.                     |
 | `experiment_2_score.py`         | When is a continuous score more useful than a yes/no answer? | Ordered rubrics represent complexity and other gradual properties better than categories. |
-| `experiment_3_routing.py`       | Can JEv control LangGraph branches?                          | A `Choice` can select a workflow worker, including an insufficient-evidence path.         |
-| `experiment_4_gemini.py`        | Where should JEv end and a generative model begin?           | JEv handles routing; Gemini handles the final natural-language answer.                    |
+| `experiment_3_routing.py`       | Can Jev control LangGraph branches?                          | A `Choice` can select a workflow worker, including an insufficient-evidence path.         |
+| `experiment_4_gemini.py`        | Where should Jev end and a generative model begin?           | Jev handles routing; Gemini handles the final natural-language answer.                    |
 | `experiment_5_guard.py`         | Can probabilities enforce a tool-approval policy?            | Thresholds can approve low-risk work and send uncertain requests for review.              |
 | `experiment_6_workflow_eval.py` | How do we test a decision workflow across cases?             | A working demo still needs repeatable accuracy and confidence measurements.               |
 
 ---
 
-## 1. What is JEv?
+## 1. What is Jev?
 
-JEv is a decision-oriented model from **TypeSafe AI**.
+Jev is a decision-oriented model from **TypeSafe AI**.
 
 Traditional LLM usage typically looks like:
 
@@ -153,12 +153,12 @@ LLM
 Generated text
 ```
 
-JEv is intended for situations where the system needs to make a **bounded, structured decision**:
+Jev is intended for situations where the system needs to make a **bounded, structured decision**:
 
 ```text
 User
   ↓
-JEv
+Jev
   ↓
 Structured decision
 ```
@@ -168,20 +168,20 @@ For example:
 ```text
 "Is this query simple?"
         ↓
-       JEv
+       Jev
         ↓
       0.87
 ```
 
-Instead of asking an LLM to generate a textual explanation and then parsing that explanation, JEv can directly produce a decision that application code can consume.
+Instead of asking an LLM to generate a textual explanation and then parsing that explanation, Jev can directly produce a decision that application code can consume.
 
 ---
 
-## 2. Why use JEv with LangGraph?
+## 2. Why use Jev with LangGraph?
 
 LangGraph is responsible for **workflow orchestration**.
 
-JEv is responsible for **making decisions**.
+Jev is responsible for **making decisions**.
 
 A generative LLM such as Gemini is responsible for **reasoning and generating content**.
 
@@ -192,7 +192,7 @@ This gives us a useful separation of responsibilities:
                      │
                      ▼
               ┌─────────────┐
-              │     JEv     │
+              │     Jev     │
               │  Decision   │
               └──────┬──────┘
                      │
@@ -214,13 +214,13 @@ This gives us a useful separation of responsibilities:
 
 A useful mental model is:
 
-> **JEv decides → LangGraph routes → LLM executes**
+> **Jev decides → LangGraph routes → LLM executes**
 
 ---
 
-# 3. JEv Decision Primitives
+# 3. Jev Decision Primitives
 
-JEv provides different primitives for different types of decisions.
+Jev provides different primitives for different types of decisions.
 
 ## Noul
 
@@ -248,7 +248,7 @@ Conceptually:
 ```text
 Query
   ↓
-JEv
+Jev
   ↓
 Noul
   ↓
@@ -299,7 +299,7 @@ Conceptually:
 ```text
                     Query
                       │
-                     JEv
+                     Jev
                       │
           ┌───────────┼───────────┐
           ▼           ▼           ▼
@@ -320,7 +320,7 @@ For example:
 How complex is this query?
 
         ↓
-       JEv
+       Jev
         ↓
       0.72
 ```
@@ -340,7 +340,7 @@ The exact constructor/API should be checked against the installed version of `la
 
 # 4. Current Experiment
 
-The current experiment asks JEv two questions about a user query:
+The current experiment asks Jev two questions about a user query:
 
 1. Is the query simple?
 2. What category does the query belong to?
@@ -351,7 +351,7 @@ For example:
 "Explain how RAG works with OpenSearch and embeddings"
 ```
 
-JEv may produce something conceptually like:
+Jev may produce something conceptually like:
 
 ```text
 is_simple → False
@@ -359,7 +359,7 @@ is_simple → False
 category → rag
 ```
 
-The exact values are produced by JEv.
+The exact values are produced by Jev.
 
 ---
 
@@ -374,7 +374,7 @@ The current application is intentionally simple:
           ┌─────────────────┐
           │   analyze_query │
           │                 │
-          │      JEv        │
+          │      Jev        │
           └────────┬────────┘
                    │
                    ▼
@@ -390,7 +390,7 @@ class State(TypedDict):
     category: str
 ```
 
-JEv reads:
+Jev reads:
 
 ```text
 query
@@ -433,7 +433,7 @@ uv add langchain-google-genai
 
 # 7. Environment Variables
 
-JEv requires a TypeSafe API key.
+Jev requires a TypeSafe API key.
 
 Set:
 
@@ -470,7 +470,7 @@ to `.gitignore`.
 
 # 8. Current Example
 
-A minimal JEv + LangGraph example:
+A minimal Jev + LangGraph example:
 
 ```python
 import os
@@ -481,7 +481,7 @@ from langchain_typesafe import TypeSafeClassifier, Noul, Choice
 
 
 # ============================================================
-# JEV
+# Jev
 # ============================================================
 
 classifier = TypeSafeClassifier(
@@ -500,7 +500,7 @@ class State(TypedDict):
 
 
 # ============================================================
-# JEV NODE
+# Jev NODE
 # ============================================================
 
 def analyze_query(state: State):
@@ -509,7 +509,7 @@ def analyze_query(state: State):
 
     response = classifier.invoke({
 
-        # Information JEv should evaluate
+        # Information Jev should evaluate
         "state": query,
 
         "questions": {
@@ -566,9 +566,9 @@ def analyze_query(state: State):
         },
     })
 
-    # Inspect JEv during experimentation
+    # Inspect Jev during experimentation
     print("\n" + "=" * 70)
-    print("RAW JEV RESPONSE")
+    print("RAW Jev RESPONSE")
     print("=" * 70)
     print(response)
 
@@ -641,7 +641,7 @@ Yes, this appears to be a simple query because...
 
 The application then has to interpret that response.
 
-With JEv:
+With Jev:
 
 ```python
 response = classifier.invoke(...)
@@ -665,20 +665,20 @@ Choice
 "rag"
 ```
 
-This makes JEv particularly interesting for **control flow**.
+This makes Jev particularly interesting for **control flow**.
 
 ---
 
-# 10. JEv + LangGraph Routing
+# 10. Jev + LangGraph Routing
 
-The next natural evolution of this experiment is to use JEv's decision to control LangGraph.
+The next natural evolution of this experiment is to use Jev's decision to control LangGraph.
 
 Instead of:
 
 ```text
 START
   ↓
-JEv
+Jev
   ↓
 END
 ```
@@ -690,7 +690,7 @@ we can build:
                            │
                            ▼
                         ┌─────┐
-                        │ JEv │
+                        │ Jev │
                         └──┬──┘
                            │
               ┌────────────┼────────────┐
@@ -733,7 +733,7 @@ graph.add_conditional_edges(
 This creates a clean separation:
 
 ```text
-JEv
+Jev
  ↓
 Decision
 
@@ -773,11 +773,11 @@ The same LLM is often responsible for both:
 1. Open-ended reasoning
 2. Simple control decisions
 
-JEv introduces another possibility:
+Jev introduces another possibility:
 
 ```text
              ┌──────────────┐
-             │     JEv      │
+             │     Jev      │
              │ Fast Decision│
              └───────┬──────┘
                      │
@@ -831,7 +831,7 @@ Then route the LangGraph workflow based on the result.
 
 ## Experiment 3 — Multiple decisions in one call
 
-Ask JEv several questions simultaneously:
+Ask Jev several questions simultaneously:
 
 ```text
 Is this simple?
@@ -844,7 +844,7 @@ Observe how structured the response is.
 
 ---
 
-## Experiment 4 — JEv + Gemini
+## Experiment 4 — Jev + Gemini
 
 Build:
 
@@ -852,7 +852,7 @@ Build:
 User
  │
  ▼
-JEv
+Jev
  │
  ├── Simple ────────► Gemini
  │
@@ -867,14 +867,14 @@ This is where the experiment becomes a realistic agent architecture.
 
 ---
 
-## Experiment 5 — JEv as a guard/decision layer
+## Experiment 5 — Jev as a guard/decision layer
 
 Try:
 
 ```text
 User
  ↓
-JEv
+Jev
  ↓
 Should this action be allowed?
  ↓
@@ -918,7 +918,7 @@ Open-ended generation and reasoning
 ```
 
 ```text
-JEv
+Jev
 =
 Fast structured decisions
 ```
@@ -933,7 +933,7 @@ Together:
 
 ```text
         ┌──────────────┐
-        │     JEv      │
+        │     Jev      │
         │    Decide    │
         └──────┬───────┘
                │
@@ -968,7 +968,7 @@ Run the experiments:
 python src/experiment_1.py  # Noul + Choice in one call
 python src/experiment_2_score.py  # Ordered complexity score
 python src/experiment_3_routing.py  # Conditional category routing
-python src/experiment_4_gemini.py  # JEv classification + Gemini
+python src/experiment_4_gemini.py  # Jev classification + Gemini
 python src/experiment_5_guard.py  # Tool approval guard
 python src/experiment_6_workflow_eval.py  # Repeatable workflow evaluation
 ```
@@ -979,7 +979,7 @@ Or:
 uv run python src/main.py
 ```
 
-Inspect the installed JEv question schemas:
+Inspect the installed Jev question schemas:
 
 ```bash
 python -c "from langchain_typesafe import Choice, Score, Noul; print('CHOICE:', Choice.model_fields); print('SCORE:', Score.model_fields); print('NOUL:', Noul.model_fields)"
@@ -1003,16 +1003,16 @@ uv lock
 
 Current:
 
-- [x] JEv installed
-- [x] JEv API key configured
+- [x] Jev installed
+- [x] Jev API key configured
 - [x] LangGraph integration
 - [x] Noul experiment
 - [x] Choice experiment
-- [x] Structured JEv output
+- [x] Structured Jev output
 - [x] Score experiment
 - [x] Conditional LangGraph routing
-- [x] JEv + Gemini
+- [x] Jev + Gemini
 - [x] Multi-agent routing (worker stubs in `experiment_3_routing.py`)
 - [x] Tool-selection experiment (approval gate in `experiment_5_guard.py`)
-- [x] JEv-based guard/approval workflow
+- [x] Jev-based guard/approval workflow
 - [x] Workflow evaluation harness
